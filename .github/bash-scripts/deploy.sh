@@ -1,12 +1,12 @@
 #!/bin/bash
-set -euo pipefail  # safer: exit on error, undefined vars, or pipe failures
+set -euo pipefail
 
 # ==============================
 # CONFIGURATION
 # ==============================
 
 APP_NAME="bitelo-api"
-IMAGE="ghcr.io/amir-hshahi/${APP_NAME}:latest"
+IMAGE="ghcr.io/amir-hshahi/bitelo/bitelo-api:latest"
 PORT=8080
 
 # ==============================
@@ -15,33 +15,30 @@ PORT=8080
 
 echo ">>> [$(date)] Logging in to GHCR..."
 
-# Use GHCR_TOKEN passed from GitHub Actions secrets
 if [ -z "${GHCR_TOKEN:-}" ]; then
   echo "ERROR: GHCR_TOKEN is not set. Exiting."
   exit 1
 fi
 
-# Non-interactive GHCR login 
 echo "${GHCR_TOKEN}" | docker login ghcr.io -u "Amir-HShahi" --password-stdin
 
+# Pull image from GHCR
 echo ">>> [$(date)] Pulling latest image from GHCR..."
 docker pull "${IMAGE}"
 
 # Stop running container (if any)
-if docker ps -q -f name="${APP_NAME}" >/dev/null; then
+if docker ps -q -f name="${APP_NAME}" 2>/dev/null | grep -q .; then
   echo ">>> [$(date)] Stopping old container..."
   docker stop "${APP_NAME}"
 fi
 
 # Remove old container (if any)
-if docker ps -aq -f name="${APP_NAME}" >/dev/null; then
+if docker ps -aq -f name="${APP_NAME}" 2>/dev/null | grep -q .; then
   echo ">>> [$(date)] Removing old container..."
   docker rm "${APP_NAME}"
 fi
 
-# remove old image to free disk
-# docker image prune -f
-
+# Run new container
 echo ">>> [$(date)] Starting new container..."
 docker run -d \
   --name "${APP_NAME}" \
@@ -50,3 +47,5 @@ docker run -d \
   "${IMAGE}"
 
 echo ">>> [$(date)] Deployment complete!"
+echo ">>> [$(date)] Container status:"
+docker ps -f name="${APP_NAME}"
