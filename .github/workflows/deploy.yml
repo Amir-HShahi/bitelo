@@ -1,0 +1,33 @@
+name: CD - Deploy to bitelo.burgerman.dev server
+
+on:
+  # deploy process only starts if application has dockerized and pushed to container registry
+  workflow_run:
+    workflows: ["Dockerize - Build Test and Push"]
+    # important: dockerize workflow must be running successfully
+    types:
+      - completed
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          # URL of server which is able to make SSH connection
+          host: ${{ secrets.SERVER_HOST }}
+          # the user which contains deploy.sh bash script
+          username: ${{ secrets.SERVER_USER }}
+          # private key of server generated and server contains matching public key
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          # used for deploy.sh to access container registry
+          envs: GHCR_TOKEN
+          script: |
+            cd /opt/burgerman
+            ./deploy.sh
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
