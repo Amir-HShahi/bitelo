@@ -9,5 +9,4 @@ public class BiteloApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BiteloApplication.class, args);
 	}
-
 }
