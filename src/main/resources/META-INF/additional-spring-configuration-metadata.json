@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "notification.api.url",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.api.url'"
+  },
+  {
+    "name": "notification.api.timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.api.timeout'"
+  },
+  {
+    "name": "notification.api.templateId",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.api.templateId'"
+  },
+  {
+    "name": "notification.api.username",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.api.username'"
+  },
+  {
+    "name": "notification.api.password",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.api.password'"
+  },
+  {
+    "name": "notification.api.templateId",
+    "type": "java.lang.Long",
+    "description": "A description for 'notification.api.templateId'"
+  }
+]}
