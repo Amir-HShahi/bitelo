@@ -1,4 +1,9 @@
 package dev.burgerman.bitelo.model.dto;
 
-public record RegistrationRequest(String countryCode, String phoneNumber, String password) {
+import dev.burgerman.bitelo.model.annotation.CountryCode;
+import dev.burgerman.bitelo.model.annotation.Password;
+import dev.burgerman.bitelo.model.annotation.PhoneNumber;
+
+public record RegistrationRequest(@CountryCode String countryCode, @PhoneNumber String phoneNumber,
+        @Password String password) {
 }

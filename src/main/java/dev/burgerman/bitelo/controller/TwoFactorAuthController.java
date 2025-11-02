@@ -7,6 +7,7 @@ import dev.burgerman.bitelo.model.User;
 import dev.burgerman.bitelo.model.dto.SetupKeysResponse;
 import dev.burgerman.bitelo.model.dto.VerifyTOTPRequest;
 import dev.burgerman.bitelo.services.Google2FAService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +26,7 @@ public class TwoFactorAuthController {
     private final Google2FAService google2faService;
 
     @PostMapping("/setup-keys")
-    public SetupKeysResponse setupCode(@AuthenticationPrincipal User user) {
+    public SetupKeysResponse setupCode(@Valid @AuthenticationPrincipal User user) {
         String secret = user.getGoogle2FASecretCode();
         String URL = google2faService.generateSetupKey(user);
         return new SetupKeysResponse(secret, URL);
@@ -42,7 +43,7 @@ public class TwoFactorAuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyTOTP(@AuthenticationPrincipal User user, @RequestBody VerifyTOTPRequest request) {
+    public ResponseEntity<?> verifyTOTP(@Valid @AuthenticationPrincipal User user, @RequestBody VerifyTOTPRequest request) {
         boolean isValid = google2faService.verifyCode(user, request.code());
         return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
     }

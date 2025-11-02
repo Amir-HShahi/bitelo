@@ -1,4 +1,6 @@
 package dev.burgerman.bitelo.model.dto;
 
-public record ForgetPasswordRequest(String phoneNumber) {
+import dev.burgerman.bitelo.model.annotation.PhoneNumber;
+
+public record ForgetPasswordRequest(@PhoneNumber String phoneNumber) {
 }

@@ -18,6 +18,7 @@ import dev.burgerman.bitelo.services.AuthService;
 import dev.burgerman.bitelo.services.PasswordResetTokenService;
 import dev.burgerman.bitelo.services.PasswordService;
 import dev.burgerman.bitelo.services.VerificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,20 +37,20 @@ public class PasswordController {
 
     @PostMapping("/forget")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ForgetPasswordResponse forgetPassword(@RequestBody ForgetPasswordRequest request) {
+    public ForgetPasswordResponse forgetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
         User user = passwordService.initiatePasswordReset(request);
         verificationService.initiatePhoneVerification(user);
         return new ForgetPasswordResponse(user.getId().toString());
     }
 
     @PostMapping("/reset")
-    public AuthToken resetPassword(@RequestBody ResetPasswordRequest request) {
+    public AuthToken resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         User user = passwordService.resetPassword(request);
         return authService.generateToken(user);
     }
 
     @PostMapping("/forget/verify-code")
-    public ForgetPasswordVerifyResponse verifyCode(@RequestBody ForgetPasswordVerifyRequest request) {
+    public ForgetPasswordVerifyResponse verifyCode(@Valid @RequestBody ForgetPasswordVerifyRequest request) {
         User user = verificationService.verifyCode(new VerifyCodeRequest(request.userId(), request.code()));
         PasswordResetToken token = resetTokenService.createToken(user);
 
