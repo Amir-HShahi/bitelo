@@ -14,6 +14,7 @@ import dev.burgerman.bitelo.model.dto.UserRegisterResponse;
 import dev.burgerman.bitelo.services.AuthService;
 import dev.burgerman.bitelo.services.UserService;
 import dev.burgerman.bitelo.services.VerificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserRegisterResponse registerUser(@RequestBody RegistrationRequest request) {
+    public UserRegisterResponse registerUser(@Valid @RequestBody RegistrationRequest request) {
         User user = userService.registerUser(request);
         verificationService.initiatePhoneVerification(user);
         UserRegisterResponse dto = new UserRegisterResponse(user);
@@ -40,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public AuthToken loginUser(@RequestBody LoginRequest request) {
+    public AuthToken loginUser(@Valid @RequestBody LoginRequest request) {
         User user = userService.loginUser(request);
         AuthToken token = authService.generateToken(user);
         return token;

@@ -10,6 +10,7 @@ import dev.burgerman.bitelo.model.dto.SendCodeRequest;
 import dev.burgerman.bitelo.model.dto.VerifyCodeRequest;
 import dev.burgerman.bitelo.services.AuthService;
 import dev.burgerman.bitelo.services.VerificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -25,14 +26,14 @@ public class VerificationController {
 
     @PostMapping("/verify-code")
     @ResponseStatus(HttpStatus.OK)
-    public AuthToken verifyPhone(@RequestBody VerifyCodeRequest request) {
+    public AuthToken verifyPhone(@Valid @RequestBody VerifyCodeRequest request) {
         User user = verificationService.verifyCode(request);
         return authService.generateToken(user);
     }
 
     @PostMapping("/send-code")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void sendCode(@RequestBody SendCodeRequest request) {
+    public void sendCode(@Valid @RequestBody SendCodeRequest request) {
         verificationService.initiatePhoneVerification(request);
     }
 }
