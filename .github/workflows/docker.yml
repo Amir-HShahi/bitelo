@@ -19,12 +19,12 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: 0000
-          POSTGRES_DB: bitelo
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_DATABASE }}
         # wait for db to be healthy before running tests
         options: >-
-          --health-cmd="pg_isready -U postgres"
+          --health-cmd="pg_isready
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -40,7 +40,7 @@ jobs:
 
       - name: Wait for PostgreSQL to be ready
         run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
+          until pg_isready -h localhost -p 5432 -U ${{ secrets.DB_USER }}; do
             echo "Waiting for postgres..."
             sleep 3
           done
@@ -48,9 +48,9 @@ jobs:
       # build and test JAR file using maven
       - name: Build and test with Maven
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/bitelo
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: 0000
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/${{ secrets.DB_DATABASE }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USER }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: mvn clean verify --file pom.xml
 
       # get TOKEN from secrets and login to ghcr
