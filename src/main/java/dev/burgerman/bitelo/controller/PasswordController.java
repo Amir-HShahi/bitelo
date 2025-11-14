@@ -7,6 +7,11 @@ import org.springframework.http.HttpStatus;
 
 import dev.burgerman.bitelo.model.PasswordResetToken;
 import dev.burgerman.bitelo.model.User;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiConflictResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiInternalServerErrorResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiForbiddenResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiNotFoundResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiUnauthorizedResponse;
 import dev.burgerman.bitelo.model.dto.AuthToken;
 import dev.burgerman.bitelo.model.dto.ForgetPasswordRequest;
 import dev.burgerman.bitelo.model.dto.ForgetPasswordResponse;
@@ -18,6 +23,7 @@ import dev.burgerman.bitelo.services.AuthService;
 import dev.burgerman.bitelo.services.PasswordResetTokenService;
 import dev.burgerman.bitelo.services.PasswordService;
 import dev.burgerman.bitelo.services.VerificationService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +31,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Password management", description = "Endpoints to recover and reset password")
 @RestController
 @RequestMapping("/api/password")
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
+@ApiInternalServerErrorResponse
 public class PasswordController {
     private final PasswordService passwordService;
     private final VerificationService verificationService;
@@ -37,6 +49,9 @@ public class PasswordController {
 
     @PostMapping("/forget")
     @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Start password reset process", description = "Initiates password reset and sends verification code to user's phone.")
+    @ApiResponse(responseCode = "202", description = "Verification code sent")
+    @ApiNotFoundResponse
     public ForgetPasswordResponse forgetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
         User user = passwordService.initiatePasswordReset(request);
         verificationService.initiatePhoneVerification(user);
@@ -44,20 +59,32 @@ public class PasswordController {
     }
 
     @PostMapping("/reset")
+    @Operation(summary = "Reset password using reset token", description = "Resets the password using a valid reset token and returns new auth token.")
+    @ApiResponse(responseCode = "200", description = "Password reset successfully")
+    @ApiUnauthorizedResponse
+    @ApiForbiddenResponse
     public AuthToken resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         User user = passwordService.resetPassword(request);
         return authService.generateToken(user);
     }
 
     @PostMapping("/forget/verify-code")
+    @Operation(summary = "Verify SMS code during password reset", description = "Verifies the code sent to user's phone and returns a password reset token.")
+    @ApiResponse(responseCode = "200", description = "Code verified")
+    @ApiUnauthorizedResponse
+    @ApiNotFoundResponse
     public ForgetPasswordVerifyResponse verifyCode(@Valid @RequestBody ForgetPasswordVerifyRequest request) {
-        User user = verificationService.verifyCode(new VerifyCodeRequest(request.userId(), request.code()));
+        User user = verificationService.verifyCode(
+                new VerifyCodeRequest(request.userId(), request.code()));
         PasswordResetToken token = resetTokenService.createToken(user);
-
         return new ForgetPasswordVerifyResponse(user.getId().toString(), token.getToken());
     }
 
     @PostMapping("/change")
+    @Operation(summary = "Change password for authenticated user", description = "Changes password for currently authenticated user.")
+    @ApiResponse(responseCode = "200", description = "Password updated")
+    @ApiUnauthorizedResponse
+    @ApiForbiddenResponse
     public String changePassword(@RequestBody String entity) {
         return entity;
     }

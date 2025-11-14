@@ -24,10 +24,10 @@ jobs:
           POSTGRES_DB: ${{ secrets.DB_DATABASE }}
         # wait for db to be healthy before running tests
         options: >-
-          --health-cmd="pg_isready
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
