@@ -1,4 +1,4 @@
-name: CD - Deploy to bitelo.burgerman.dev server
+name: CD - Deploy to cloud server
 
 on:
   # deploy process only starts if application has dockerized and pushed to container registry
@@ -24,10 +24,25 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           # private key of server generated and server contains matching public key
           key: ${{ secrets.SERVER_SSH_KEY }}
-          # used for deploy.sh to access container registry
-          envs: GHCR_TOKEN
+          # Pass all required secrets to the deployment script
+          envs: GHCR_TOKEN,DB_USER,DB_PASSWORD,DB_DATABASE,JWT_SECRET,SMS_PASSWORD
           script: |
             cd /opt/burgerman
+
+            # Export secrets as environment variables for deploy.sh
+            export GHCR_TOKEN="${GHCR_TOKEN}"
+            export DB_USER="${DB_USER}"
+            export DB_PASSWORD="${DB_PASSWORD}"
+            export DB_DATABASE="${DB_DATABASE}"
+            export JWT_SECRET="${JWT_SECRET}"
+            export SMS_PASSWORD="${SMS_PASSWORD}"
+
+            # Run deployment script
             ./deploy.sh
         env:
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SMS_PASSWORD: ${{ secrets.SMS_PASSWORD }}
