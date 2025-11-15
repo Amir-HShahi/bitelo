@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.burgerman.bitelo.model.PasswordResetToken;
 import dev.burgerman.bitelo.model.User;
+import dev.burgerman.bitelo.model.exception.BadRequestException;
 import dev.burgerman.bitelo.repository.PasswordResetTokenRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,12 +47,12 @@ public class PasswordResetTokenService {
         Optional<PasswordResetToken> optionalResetToken = tokensRepo.findByTokenAndUsedFalse(token);
 
         if (optionalResetToken.isEmpty())
-            throw new BadCredentialsException("Invalid token");
+            throw new BadRequestException("Invalid token");
 
         PasswordResetToken resetToken = optionalResetToken.get();
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now()))
-            throw new BadCredentialsException("Token is expired");
+            throw new BadRequestException("Token is expired");
 
         return optionalResetToken.get();
     }

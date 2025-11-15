@@ -4,67 +4,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.burgerman.bitelo.model.User;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiInternalServerErrorResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiBearerAuth;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiForbiddenResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiUnauthorizedResponse;
 import dev.burgerman.bitelo.model.dto.SetupKeysResponse;
 import dev.burgerman.bitelo.model.dto.VerifyTOTPRequest;
 import dev.burgerman.bitelo.services.Google2FAService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
+@Tag(name = "Two-Factor Authentication", description = "Endpoints for Google Authenticator (TOTP)")
 @RestController
 @RequestMapping("/api/2fa")
 @Slf4j
 @RequiredArgsConstructor
+@ApiInternalServerErrorResponse
+@ApiBearerAuth
 public class TwoFactorAuthController {
-    private final Google2FAService google2faService;
+        private final Google2FAService google2faService;
 
-    @PostMapping("/setup-keys")
-    public SetupKeysResponse setupCode(@Valid @AuthenticationPrincipal User user) {
-        String secret = user.getGoogle2FASecretCode();
-        String URL = google2faService.generateSetupKey(user);
-        return new SetupKeysResponse(secret, URL);
-    }
+        @GetMapping("/setup-keys")
+        @Operation(summary = "Generate 2FA setup keys", description = "Returns the user's TOTP secret and Google Authenticator QR code link")
+        @ApiResponse(responseCode = "200", description = "Setup keys generated successfully")
+        @ApiForbiddenResponse
+        public SetupKeysResponse setupCode(@AuthenticationPrincipal User user) {
+                String secret = user.getGoogle2FASecretCode();
+                String url = google2faService.generateSetupKey(user);
+                return new SetupKeysResponse(secret, url);
+        }
 
-    @PostMapping("/enable")
-    public String enable2FA(@RequestBody String entity) {
-        return entity;
-    }
+        @PostMapping("/verify")
+        @Operation(summary = "Verify 2FA TOTP code", description = "Checks if the provided TOTP code is valid for the authenticated user")
+        @ApiResponse(responseCode = "200", description = "TOTP code is valid")
+        @ApiUnauthorizedResponse
+        @ApiResponse(responseCode = "400", description = "Invalid TOTP code")
+        public ResponseEntity<?> verifyTOTP(
+                        @AuthenticationPrincipal User user,
+                        @RequestBody VerifyTOTPRequest request) {
 
-    @PostMapping("/disable")
-    public String disable2FA(@RequestBody String entity) {
-        return entity;
-    }
-
-    @PostMapping("/verify")
-    public ResponseEntity<?> verifyTOTP(@Valid @AuthenticationPrincipal User user, @RequestBody VerifyTOTPRequest request) {
-        boolean isValid = google2faService.verifyCode(user, request.code());
-        return isValid ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
-    }
-
-    @GetMapping("/backup-codes")
-    public String generateBackupCodes() {
-        return new String();
-    }
-
-    @PostMapping("/verify-backup")
-    public String verifyBackupCode(@RequestBody String entity) {
-        return entity;
-    }
-
-    @PostMapping("/regenerate-backup")
-    public String regenerateBackupCodes(@RequestBody String entity) {
-        return entity;
-    }
-
-    @GetMapping("/status")
-    public String statusOf2FA(@RequestParam String param) {
-        return new String();
-    }
+                boolean isValid = google2faService.verifyCode(user, request.code());
+                return isValid ? ResponseEntity.ok().build()
+                                : ResponseEntity.badRequest().build();
+        }
 }

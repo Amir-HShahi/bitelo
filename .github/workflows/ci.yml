@@ -41,7 +41,9 @@ jobs:
 
       - name: Build and test with Maven
         env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SMS_PASSWORD: ${{ secrets.SMS_PASSWORD }}
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/${{ secrets.DB_DATABASE }}
           SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USER }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: mvn clean verify

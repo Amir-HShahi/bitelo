@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
                 traceId);
         response.setFieldErrors(Map.of(ex.getName(), error));
         return response;
-    }
+    } 
 
     /*
      * --------------------------------------------------------------------- *
