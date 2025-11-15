@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 
 import dev.burgerman.bitelo.model.PasswordResetToken;
 import dev.burgerman.bitelo.model.User;
-import dev.burgerman.bitelo.model.annotation.swagger.ApiConflictResponse;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiInternalServerErrorResponse;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiForbiddenResponse;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiNotFoundResponse;

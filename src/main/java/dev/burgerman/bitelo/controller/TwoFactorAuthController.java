@@ -5,12 +5,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.burgerman.bitelo.model.User;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiInternalServerErrorResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiBearerAuth;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiForbiddenResponse;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiUnauthorizedResponse;
 import dev.burgerman.bitelo.model.dto.SetupKeysResponse;
 import dev.burgerman.bitelo.model.dto.VerifyTOTPRequest;
 import dev.burgerman.bitelo.services.Google2FAService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +23,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @Tag(name = "Two-Factor Authentication", description = "Endpoints for Google Authenticator (TOTP)")
 @RestController
@@ -31,6 +30,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @Slf4j
 @RequiredArgsConstructor
 @ApiInternalServerErrorResponse
+@ApiBearerAuth
 public class TwoFactorAuthController {
         private final Google2FAService google2faService;
 
