@@ -4,14 +4,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import dev.burgerman.bitelo.model.PasswordResetToken;
 import dev.burgerman.bitelo.model.User;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiInternalServerErrorResponse;
+import dev.burgerman.bitelo.model.annotation.swagger.ApiBearerAuth;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiForbiddenResponse;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiNotFoundResponse;
 import dev.burgerman.bitelo.model.annotation.swagger.ApiUnauthorizedResponse;
 import dev.burgerman.bitelo.model.dto.AuthToken;
+import dev.burgerman.bitelo.model.dto.ChangePasswordRequest;
 import dev.burgerman.bitelo.model.dto.ForgetPasswordRequest;
 import dev.burgerman.bitelo.model.dto.ForgetPasswordResponse;
 import dev.burgerman.bitelo.model.dto.ForgetPasswordVerifyRequest;
@@ -27,6 +30,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -79,12 +83,14 @@ public class PasswordController {
         return new ForgetPasswordVerifyResponse(user.getId().toString(), token.getToken());
     }
 
-    @PostMapping("/change")
+    @PatchMapping("/change")
     @Operation(summary = "Change password for authenticated user", description = "Changes password for currently authenticated user.")
-    @ApiResponse(responseCode = "200", description = "Password updated")
+    @ApiResponse(responseCode = "204", description = "Password updated. No content to return")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiUnauthorizedResponse
     @ApiForbiddenResponse
-    public String changePassword(@RequestBody String entity) {
-        return entity;
+    @ApiBearerAuth
+    public void changePassword(@AuthenticationPrincipal User user, @Valid @RequestBody ChangePasswordRequest request) {
+        passwordService.updateUserPassword(request.newPassword(), user);
     }
 }
